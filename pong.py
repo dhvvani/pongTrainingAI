@@ -1,4 +1,8 @@
 import pygame
+
+from Paddle import Paddle
+from PingBall import PingBall
+
 pygame.init()
 
 #global variables
@@ -28,54 +32,6 @@ BALL_RADIUS = 10
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
 WIN_FONT = pygame.font.SysFont("comicsans", 75)
 
-#classes
-class Paddle:
-    PADDLE_COLOR = WHITE
-    PADDLE_VELOCITY = 4
-    def __init__(self, x, y, width, height):
-        self.x = self.origX = x
-        self.y = self.origY = y
-        self.width = width
-        self.height = height
-
-    def drawPaddle(self, window):
-        pygame.draw.rect(window, self.PADDLE_COLOR, (self.x, self.y, self.width, self.height) )
-
-    def movePaddle(self, up = True):
-        #use min and max to prevent paddles from moving off the window
-        if up:
-            self.y = max(0, self.y - self.PADDLE_VELOCITY)
-        else:
-            self.y = min(HEIGHT - PADDLE_HEIGHT, self.y + self.PADDLE_VELOCITY )
-
-    def reset(self):
-        self.x = self.origX
-        self.y = self.origY
-
-class PingBall:
-    MAX_VELOCITY = 5
-    BALL_COLOR = PINK
-    def __init__(self, x, y, radius):
-        self.x = self.origX = x
-        self.y = self.origY = y
-        self.radius = radius
-        self.yVel = 0
-        self.xVel = self.MAX_VELOCITY
-
-    def drawBall(self, window):
-        pygame.draw.circle(window, self.BALL_COLOR, (self.x, self.y), self.radius)
-
-    def moveBall(self):
-        self.x +=self.xVel
-        self.y += self.yVel
-
-    def reset(self):
-        self.x = self.origX
-        self.y = self.origY
-
-        #SHOOTS BALL TO OPPONENT
-        self.yVel = 0
-        self.xVel *= -1
 
 #functions
 def draw(window, paddles, ball, lScore, rScore):
@@ -102,14 +58,14 @@ def draw(window, paddles, ball, lScore, rScore):
 
 def handlePaddleMovement(keys, lPaddle, rPaddle):
     if keys[pygame.K_w]:
-        lPaddle.movePaddle(up=True)
+        lPaddle.movePaddle(HEIGHT, PADDLE_HEIGHT, up=True)
     if keys[pygame.K_s]:
-        lPaddle.movePaddle(up = False)
+        lPaddle.movePaddle(HEIGHT, PADDLE_HEIGHT, up = False)
 
     if keys[pygame.K_UP]:
-        rPaddle.movePaddle(up=True)
+        rPaddle.movePaddle(HEIGHT, PADDLE_HEIGHT, up=True)
     if keys[pygame.K_DOWN]:
-        rPaddle.movePaddle(up = False)
+        rPaddle.movePaddle(HEIGHT, PADDLE_HEIGHT, up = False)
 
 
 
