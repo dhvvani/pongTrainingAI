@@ -18,6 +18,12 @@ PINK = (255, 182, 193)
 PADDLE_WIDTH = 20
 PADDLE_HEIGHT = 100
 
+#PING PONG BALL VARIABLES
+BALL_RADIUS = 10
+
+#Text Variables
+SCORE_FONT = pygame.font.SysFont("comicsans", 50)
+
 
 #classes
 class Paddle:
@@ -39,9 +45,33 @@ class Paddle:
         else:
             self.y = min(HEIGHT - PADDLE_HEIGHT, self.y + self.PADDLE_VELOCITY )
 
+
+class PingBall:
+    MAX_VELOCITY = 5
+    BALL_COLOR = PINK
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.yVel = 0
+        self.xVel = self.MAX_VELOCITY
+
+    def drawBall(self, window):
+        pygame.draw.circle(window, self.BALL_COLOR, (self.x, self.y), self.radius)
+
+    def moveBall(self):
+        self.x +=self.xVel
+        self.y += self.yVel
+
 #functions
-def draw(window, paddles):
+def draw(window, paddles, ball, lScore, rScore):
     window.fill(BLACK)
+
+    lScoreText = SCORE_FONT.render(f"{lScore}", 1 ,WHITE)
+    rScoreText = SCORE_FONT.render(f"{rScore}", 1, WHITE)
+
+    window.blit(lScoreText, (WIDTH//4 - lScoreText.get_width() // 2, 20))
+    window.blit(rScoreText, (WIDTH -WIDTH // 4 - rScoreText.get_width() // 2, 20))
 
     for paddle in paddles:
         paddle.drawPaddle(window)
@@ -52,6 +82,7 @@ def draw(window, paddles):
         if( i % 2 == 0):
             pygame.draw.rect(window, WHITE, (WIDTH/2 - rectWidth//2, i, rectWidth, HEIGHT//20))
 
+    ball.drawBall(window)
 
     pygame.display.update()
 
@@ -68,17 +99,62 @@ def handlePaddleMovement(keys, lPaddle, rPaddle):
 
 
 
+#to handle paddle-ball collicion, the the angle of bounce of the ball after it hits the paddle
+#depends on the distance between the point of collision on the paddle and the center of the
+#paddle. Want max velocity when we have maximum distance (when the ball hits the edge of the paddle = PADDLE_HEIGHT /2).
+#Let thereduction factor =  distance / max velocity of ball
+def handleCollision(rPaddle, lPaddle, ball):
+    #handling collision with the ceiling and floor (not left/right since that is how a player looses
+    if( ball.y + ball.radius//2 >= HEIGHT ) or ( ball.y - ball.radius //2 <= 0 ):
+        ball.yVel *= -1
+
+    #handling collision w ball
+    #if velocity is negative, then moving in the left direction, hence,collision w lpaddle
+
+    redFact = (PADDLE_HEIGHT / 2) / ball.MAX_VELOCITY
+
+    if(ball.xVel < 0
+    and ball.y - BALL_RADIUS//2 >= lPaddle.y
+    and ball.y + BALL_RADIUS//2 <= lPaddle.y + PADDLE_HEIGHT
+    and ball.x - BALL_RADIUS//2  <= lPaddle.x + PADDLE_WIDTH ):
+
+        ball.xVel *= -1
+
+        middle_y = lPaddle.y + PADDLE_HEIGHT/2
+        distanceInY = middle_y - ball.y
+
+        ball.yVel = distanceInY / redFact * -1
+
+    elif (ball.xVel > 0
+    and ball.y - BALL_RADIUS//2 >= rPaddle.y
+    and ball.y + BALL_RADIUS//2 <= rPaddle.y + PADDLE_HEIGHT
+    and ball.x + BALL_RADIUS//2  >= rPaddle.x ):
+
+        ball.xVel *= -1
+
+        middle_y = rPaddle.y + PADDLE_HEIGHT / 2
+        distanceInY = middle_y - ball.y
+
+        ball.yVel = distanceInY / redFact * -1
+
+
+
+
 def main():
     gameRunning = True
     clock = pygame.time.Clock()
 
     leftPaddle = Paddle(10, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
     rightPaddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
+    ball = PingBall(WIDTH//2, HEIGHT//2, BALL_RADIUS)
+
+    lScore = 0
+    rScore = 0
 
     while gameRunning:
         #this forces all computers to run at the same FPS
         clock.tick(FRAMES_PER_SEC)
-        draw(WINDOW, [leftPaddle, rightPaddle])
+        draw(WINDOW, [leftPaddle, rightPaddle], ball, lScore, rScore)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -87,6 +163,15 @@ def main():
 
         keysUsed = pygame.key.get_pressed()
         handlePaddleMovement(keysUsed, leftPaddle, rightPaddle)
+
+        ball.moveBall()
+        handleCollision(rightPaddle,leftPaddle, ball)
+
+        if ball.x < 0:
+            rScore += 1
+
+        if ball.x > WIDTH:
+            lScore += 1
 
     pygame.quit()
 
