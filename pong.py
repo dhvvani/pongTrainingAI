@@ -9,10 +9,13 @@ pygame.display.set_caption("ping pong!")
 
 FRAMES_PER_SEC = 60
 
+WINNING_SCORE = 10
+
 #color variables:
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 PINK = (255, 182, 193)
+GREEN = (0, 255, 0)
 
 #Paddle variables
 PADDLE_WIDTH = 20
@@ -23,15 +26,15 @@ BALL_RADIUS = 10
 
 #Text Variables
 SCORE_FONT = pygame.font.SysFont("comicsans", 50)
-
+WIN_FONT = pygame.font.SysFont("comicsans", 75)
 
 #classes
 class Paddle:
     PADDLE_COLOR = WHITE
     PADDLE_VELOCITY = 4
     def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
+        self.x = self.origX = x
+        self.y = self.origY = y
         self.width = width
         self.height = height
 
@@ -45,13 +48,16 @@ class Paddle:
         else:
             self.y = min(HEIGHT - PADDLE_HEIGHT, self.y + self.PADDLE_VELOCITY )
 
+    def reset(self):
+        self.x = self.origX
+        self.y = self.origY
 
 class PingBall:
     MAX_VELOCITY = 5
     BALL_COLOR = PINK
     def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
+        self.x = self.origX = x
+        self.y = self.origY = y
         self.radius = radius
         self.yVel = 0
         self.xVel = self.MAX_VELOCITY
@@ -62,6 +68,14 @@ class PingBall:
     def moveBall(self):
         self.x +=self.xVel
         self.y += self.yVel
+
+    def reset(self):
+        self.x = self.origX
+        self.y = self.origY
+
+        #SHOOTS BALL TO OPPONENT
+        self.yVel = 0
+        self.xVel *= -1
 
 #functions
 def draw(window, paddles, ball, lScore, rScore):
@@ -169,9 +183,29 @@ def main():
 
         if ball.x < 0:
             rScore += 1
+            ball.reset()
 
         if ball.x > WIDTH:
             lScore += 1
+            ball.reset()
+
+        if(lScore >= WINNING_SCORE):
+            lText = WIN_FONT.render("Left player won!", 1, GREEN)
+            WINDOW.blit(lText, (WIDTH//2 - lText.get_width()//2, HEIGHT//2 - lText.get_height()//2))
+            pygame.display.update()
+            pygame.time.delay(2500)
+        if(rScore >= WINNING_SCORE):
+            rText = WIN_FONT.render("Right player won!", 1, GREEN)
+            WINDOW.blit(rText, (WIDTH // 2 - rText.get_width() // 2, HEIGHT // 2 - rText.get_height() // 2))
+            pygame.display.update()
+            pygame.time.delay(2500)
+
+        if (lScore >= WINNING_SCORE or rScore >= WINNING_SCORE):
+            leftPaddle.reset()
+            rightPaddle.reset()
+            ball.reset()
+            lScore = 0
+            rScore = 0
 
     pygame.quit()
 
