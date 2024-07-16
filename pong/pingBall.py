@@ -1,13 +1,19 @@
 import pygame
 class PingBall:
+    # Ping-pong ball variables
+    BALL_RADIUS = 10
     MAX_VELOCITY = 5
     BALL_COLOR = (255, 182, 193)
-    def __init__(self, x, y, radius):
+
+    def __init__(self, x, y):
         self.x = self.origX = x
         self.y = self.origY = y
-        self.radius = radius
-        self.yVel = 0
+
+        self.radius = self.BALL_RADIUS
+
         self.xVel = self.MAX_VELOCITY
+        self.yVel = 0
+
 
     def drawBall(self, window):
         pygame.draw.circle(window, self.BALL_COLOR, (self.x, self.y), self.radius)
@@ -21,5 +27,5 @@ class PingBall:
         self.y = self.origY
 
         #SHOOTS BALL TO OPPONENT
-        self.yVel = 0
         self.xVel *= -1
+        self.yVel = 0
