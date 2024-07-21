@@ -13,7 +13,7 @@ class Paddle:
     def drawPaddle(self, window):
         pygame.draw.rect(window, self.PADDLE_COLOR, (self.x, self.y, self.PADDLE_WIDTH, self.PADDLE_HEIGHT) )
 
-    def movePaddle(self, windowHeight, up = True):
+    def movePaddle(self, windowHeight, up= True):
         #use min and max to prevent paddles from moving off the window
         if up:
             self.y = max(0, self.y - self.PADDLE_VELOCITY)
