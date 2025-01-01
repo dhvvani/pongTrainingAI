@@ -58,20 +58,20 @@ class Game:
         lScoreText = self.SCORE_FONT.render(f"{self.lScore}", 1, self.WHITE)
         rScoreText = self.SCORE_FONT.render(f"{self.rScore}", 1, self.WHITE)
 
-        self.window.blit(lScoreText, (WIDTH // 4 - lScoreText.get_width() // 2, 20))
-        self.window.blit(rScoreText, (WIDTH - WIDTH // 4 - rScoreText.get_width() // 2, 20))
+        self.window.blit(lScoreText, (WIDTH//4 - lScoreText.get_width()//2, 20))
+        self.window.blit(rScoreText, (WIDTH - WIDTH//4 - rScoreText.get_width()//2, 20))
 
 
     def drawHits(self):
         hitTexts = self.SCORE_FONT.render(f"{self.lHits + self.rHits}", 1, self.RED)
-        self.window.blit(hitTexts, (self.windowWidth //2 - hitTexts.get_width() // 2, 10))
+        self.window.blit(hitTexts, (self.windowWidth//2 - hitTexts.get_width()//2, 10))
 
     def drawDivider(self):
         # draw a line every 20 pixels to draw a dotted line
         rectWidth = 10
         for i in range(10, HEIGHT, HEIGHT // 20):
             if (i % 2 == 0):
-                pygame.draw.rect(self.window, self.WHITE, (self.windowWidth / 2 - rectWidth // 2, i, rectWidth, self.windowHeight // 20))
+                pygame.draw.rect(self.window, self.WHITE, (self.windowWidth/2 - rectWidth//2, i, rectWidth, self.windowHeight//20))
 
 
     # to handle paddle-ball collicion, the the angle of bounce of the ball after it hits the paddle
@@ -91,19 +91,21 @@ class Game:
         # handling collision w ball
         # if velocity is negative, then moving in the left direction, hence,collision w lpaddle
 
-        redFact = (lPaddle.PADDLE_HEIGHT / 2) / ball.MAX_VELOCITY
+        reductionFact = (lPaddle.PADDLE_HEIGHT / 2) / ball.MAX_VELOCITY
 
         if (ball.xVel < 0
-                and ball.y - ball.radius // 2 >= lPaddle.y
-                and ball.y + ball.radius // 2 <= lPaddle.y + lPaddle.PADDLE_HEIGHT
-                and ball.x - ball.radius // 2 <= lPaddle.x + lPaddle.PADDLE_WIDTH):
+            and ball.y - ball.radius // 2 >= lPaddle.y
+            and ball.y + ball.radius // 2 <= lPaddle.y + lPaddle.PADDLE_HEIGHT
+            and ball.x - ball.radius // 2 <= lPaddle.x + lPaddle.PADDLE_WIDTH):
 
             ball.xVel *= -1
 
             middle_y = lPaddle.y + lPaddle.PADDLE_HEIGHT / 2
             distanceInY = middle_y - ball.y
 
-            ball.yVel = distanceInY / redFact * -1
+            ball.yVel = distanceInY / reductionFact * -1
+
+            self.lHits+=1
 
         elif (ball.xVel > 0
               and ball.y - ball.radius // 2 >= rPaddle.y
@@ -115,14 +117,19 @@ class Game:
             middle_y = rPaddle.y + rPaddle.PADDLE_HEIGHT / 2
             distanceInY = middle_y - ball.y
 
-            ball.yVel = distanceInY / redFact * -1
+            ball.yVel = distanceInY / reductionFact * -1
+            self.rHits += 1
 
-    def draw(self, drawScr = True, drawHits = False):
+    def draw(self, drawScr, drawHits):
         self.window.fill(self.BLACK)
 
         self.drawDivider()
-        self.drawScore()
-        self.drawHits()
+
+        if drawScr:
+            self.drawScore()
+
+        if drawHits:
+            self.drawHits()
 
         for paddle in [self.leftPaddle, self.rightPaddle]:
             paddle.drawPaddle(self.window)
@@ -167,6 +174,7 @@ class Game:
         if self.ball.x < 0:
             self.ball.reset()
             self.rScore += 1
+
         elif self.ball.x > self.windowWidth:
             self.ball.reset()
             self.lScore += 1
@@ -174,6 +182,7 @@ class Game:
         gameInfo =  GameInfo(self.lHits, self.rHits, self.lScore, self.rScore)
 
         return gameInfo
+
     def reset(self):
         self.ball.reset()
         self.leftPaddle.reset()
