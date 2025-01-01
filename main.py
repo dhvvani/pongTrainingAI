@@ -81,7 +81,7 @@ class pongGame:
 
             # if either (you or the opponent) paddle misses the ball once, end the game since it will most likely miss again
             # or stop the game once the left player hits 50 so the AI doesnt play infinitely
-            if gameInfo.lScore >= 1 or gameInfo.rScore >= 1 or gameInfo.lHits > maxHits:
+            if gameInfo.lScore >= 1 or gameInfo.rScore >= 1 or (gameInfo.lHits + gameInfo.rHits) > maxHits:
                 self.calFitness(gameInfo, duration)
                 break
 
